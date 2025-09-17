@@ -657,5 +657,135 @@ window.PROJECTS = {
       "description": "— Критические правки\n— Мини-регресс\n— Чистка TODO\n— Финальный чек",
       "status": "Не выполнено"
     }
+  ],
+
+  "Оптовик": [
+    // Неделя 1 — каркас, БД, базовая админ-панель
+    {
+      week: 1, day: "Пн", epic: "Инфраструктура",
+      title: "Каркас репо и окружение",
+      description: "— Структура: /aiogram_bot.py, /pyrogram_bots.py, /database/{database.py,database.db}, /keyboards.py, /texts.py, /main.py, /sessions/, /start.json\n— requirements.txt: aiogram>=3, pyrogram>=2.0.106, tgcrypto, apscheduler, python-dotenv, aiosqlite\n— .env: TELEGRAM_BOT_API, TELEGRAM_API_ID, TELEGRAM_API_HASH, LOGGING_CHANNEL_ID, CLAIM_TTL_SEC=180\n— Настроить логи и TZ=Europe/Moscow",
+      status: "Не выполнено"
+    },
+    {
+      week: 1, day: "Вт", epic: "База данных",
+      title: "Схема SQLite и индексы",
+      description: "— Таблицы: users, shops(category in {'shop','competitor'}), words, categories, channels, accounts, accounts_channels, claimed_messages, word_mentions, alerts, alert_messages\n— Индексы: word_mentions(word_id,channel_id,mention_date), claimed_messages(channel_id,message_id) UNIQUE, channels(category_id), accounts_channels(account_id,channel_id)\n— seed: админы в users",
+      status: "Не выполнено"
+    },
+    {
+      week: 1, day: "Ср", epic: "Aiogram панель",
+      title: "/start + «Магазины» (UX по ТЗ)",
+      description: "— /start: проверка admin_exists, меню: Оптовики | Магазины | Аккаунты [UserBots] | Предварительный отчёт\n— Экран «Магазины»: добавление/список (✅ наши/❌ конкуренты), карточка магазина, добавление слов с новой строки, «Отмена» везде\n— Клавиатуры: сетки 2/3 в ряд, только редактирование сообщений (новое сообщение — ТОЛЬКО на ручной ввод)",
+      status: "Не выполнено"
+    },
+    {
+      week: 1, day: "Чт", epic: "Aiogram панель",
+      title: "«Оптовики»: категории/каналы",
+      description: "— Экран «Оптовики»: список категорий, пагинация каналов 10/стр, Страница X/Y, стрелки, кнопки Изменить/Удалить категорию\n— Добавление канала: @username | https://t.me/username | https://t.me/+hash | -100id | пересланный пост; статус joined_status не трогаем тут\n— Тогглы is_active/posts; карточка канала с тех.данными",
+      status: "Не выполнено"
+    },
+    {
+      week: 1, day: "Пт", epic: "Аккаунты",
+      title: "«Аккаунты [UserBots]»: список/добавление",
+      description: "— Экран: «Добавить аккаунт», сетка имён (2 в ряд), «Ребаланс», «На главную»\n— Флоу: телефон -> код -> (2FA при необходимости), .session сохраняем; успех => enabled=1\n— Кнопка «Ребаланс»: распределение подписок и ensure_memberships_for_all",
+      status: "Не выполнено"
+    },
+
+    // Неделя 2 — Pyrogram менеджер, дедуп, алерты, отчёты
+    {
+      week: 2, day: "Пн", epic: "Pyrogram менеджер",
+      title: "Клиенты, on_message, ребаланс",
+      description: "— PyrogramManager: старт/стоп клиентов по accounts.enabled; heartbeat\n— refresh_keywords() для shops/competitors\n— rebalance_assignments(): всем включённым аккаунтам выдать все активные каналы",
+      status: "Не выполнено"
+    },
+    {
+      week: 2, day: "Вт", epic: "Вступления/подписки",
+      title: "ensure_memberships_for_all + pending",
+      description: "— join_chat по invite_link/username/id; UserAlreadyParticipant -> ok\n— pending (InviteRequest) учитываем как 2 в accounts_channels\n— Часовой reconcile: переподписать отсутствующих, обновить joined_status",
+      status: "Не выполнено"
+    },
+    {
+      week: 2, day: "Ср", epic: "Дедуп и обработка",
+      title: "CLAIM/TTL и парсинг постов",
+      description: "— Таблица claimed_messages; try_claim_message(..., ttl=CLAIM_TTL_SEC)\n— Обработка текста/подписей, поиск слов (низкий регистр), только текст/ссылки\n— word_mentions: INSERT OR IGNORE; posts=0 блокирует лог только для наших магазинов",
+      status: "Не выполнено"
+    },
+    {
+      week: 2, day: "Чт", epic: "Уведомления",
+      title: "Лог-канал и алерты конкурентов",
+      description: "— Копия поста в LOGGING_CHANNEL_ID: caption с каналом/категорией/хэштегом/словами/временем (МСК)\n— Если найден конкурент: разослать всем админам алерт + кнопка «Дать пиздов»; обработчик в aiogram, закрытие у всех, запись в alerts.closed_by",
+      status: "Не выполнено"
+    },
+    {
+      week: 2, day: "Пт", epic: "Отчёты",
+      title: "«Предварительный отчёт» + .txt + расписание",
+      description: "— generate_weekly_report_for_user(): сбор данных за текущую неделю (MSK)\n— Рендер отчёта чанками ≤4000 символов + файл .txt\n— APScheduler: каждое ВС 23:55 МСК — weekly отчёт админам",
+      status: "Не выполнено"
+    },
+
+    // Неделя 3 — надёжность, полировка, безопасность
+    {
+      week: 3, day: "Пн", epic: "Надёжность",
+      title: "FloodWait/ошибки/ретраи",
+      description: "— Повтор copy_message при FloodWait; задержки e.value+5\n— last_error на аккаунте; логи RPCError; выдержка при массовых алертах\n— Защита от пустых/медийных постов без текста",
+      status: "Не выполнено"
+    },
+    {
+      week: 3, day: "Вт", epic: "UX панели",
+      title: "Тексты/эмодзи/«Отмена»/валидации",
+      description: "— Привести все тексты к единому стилю (как в ТЗ)\n— Сетки: категории/аккаунты 2 в ряд, слова 3 в ряд, каналы 2 в ряд\n— Гарантировать: ввод -> бот отвечает НОВЫМ сообщением; кнопки -> строго edit",
+      status: "Не выполнено"
+    },
+    {
+      week: 3, day: "Ср", epic: "Безопасность",
+      title: "Роли/права и санитация",
+      description: "— admin_only на всех callback/message\n— Санитация отображаемых строк (escape HTML там, где надо)\n— Ограничение на длину/кол-во слов при добавлении",
+      status: "Не выполнено"
+    },
+    {
+      week: 3, day: "Чт", epic: "Деплой",
+      title: "PM2 + start.json + логирование",
+      description: "— start.json для двух процессов (aiogram, pyrogram manager)\n— Ротация логов, проверка tzdata\n— Проверка прав на /sessions и на database.db (rw)",
+      status: "Не выполнено"
+    },
+    {
+      week: 3, day: "Пт", epic: "Тесты",
+      title: "E2E сценарии и проверка отчётов",
+      description: "— Синтетические каналы/посты с ключевыми словами\n— Проверка дедупа при 3–4 аккаунтах одновременно\n— Проверка: алерт конкурента + «Дать пиздов» + лог-канал\n— Проверка еженедельного отчёта по расписанию",
+      status: "Не выполнено"
+    },
+
+    // Неделя 4 — улучшения и буфер
+    {
+      week: 4, day: "Пн", epic: "Ребаланс",
+      title: "Улучшение распределения и статистики",
+      description: "— Метрика coverage по аккаунтам (joined/target/pending)\n— Переподписка новых аккаунтов в уже существующие каналы\n— UI: показывать для каждого аккаунта joined/total/pending",
+      status: "Не выполнено"
+    },
+    {
+      week: 4, day: "Вт", epic: "Ретрий заявок",
+      title: "Мониторинг pending-каналов",
+      description: "— Фоновая задача: повторная попытка join по пригласительной, если статус pending>24ч — алерт в панель\n— UI: пометка каналов «В ожидании…»",
+      status: "Не выполнено"
+    },
+    {
+      week: 4, day: "Ср", epic: "Бэкапы",
+      title: "Резерв/восстановление БД",
+      description: "— Ежедневный backup database.db с ротацией N дней\n— Команда/кнопка выгрузки .db из панели (только для root-админа)",
+      status: "Не выполнено"
+    },
+    {
+      week: 4, day: "Чт", epic: "Документация",
+      title: "README/операционные регламенты",
+      description: "— README: .env, запуск, добавление аккаунта, ребаланс, отчёты\n— Диагностика PhoneCodeExpired/2FA/FloodWait\n— Схемы таблиц и назначение полей",
+      status: "Не выполнено"
+    },
+    {
+      week: 4, day: "Пт", epic: "Буфер",
+      title: "Резерв на багфиксы",
+      description: "— Критические правки\n— Мини-регресс\n— Полировка текстов/клавиатур",
+      status: "Не выполнено"
+    }
   ]
 };
